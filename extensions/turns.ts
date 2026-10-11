@@ -97,7 +97,7 @@ function collectTimings(entries: SessionEntry[]): TimingSummary {
 
 		return {
 			index: index + 1,
-			prompt: current.prompt.replace(/\s+/g, " ").trim() || "（空文本）",
+			prompt: current.prompt.replace(/\s+/g, " ").trim() || "(empty text)",
 			promptAt: current.promptAt,
 			targetId,
 			models: [...models],
@@ -122,10 +122,10 @@ function formatDuration(milliseconds: number | undefined): string {
 	seconds %= 60;
 
 	const parts: string[] = [];
-	if (days) parts.push(`${days}天`);
-	if (hours) parts.push(`${hours}时`);
-	if (minutes) parts.push(`${minutes}分`);
-	if (seconds || parts.length === 0) parts.push(`${seconds}秒`);
+	if (days) parts.push(`${days}d`);
+	if (hours) parts.push(`${hours}h`);
+	if (minutes) parts.push(`${minutes}m`);
+	if (seconds || parts.length === 0) parts.push(`${seconds}s`);
 	return parts.slice(0, 2).join("");
 }
 
@@ -200,20 +200,20 @@ class TurnsComponent {
 			? this.summary.totalProcessing / this.summary.completedCount
 			: undefined;
 		const header = [
-			truncateToWidth(th.fg("accent", th.bold("Prompt 时间与费用统计")), width),
+			truncateToWidth(th.fg("accent", th.bold("Prompt Timing & Cost Stats")), width),
 			truncateToWidth(
 				th.fg(
 					"muted",
-					`共 ${this.summary.rows.length} 次 · 累计费用 ${formatCost(this.summary.totalCost)} · 累计处理 ${formatDuration(this.summary.totalProcessing)} · 平均处理 ${formatDuration(average)}`,
+					`${this.summary.rows.length} turns · total cost ${formatCost(this.summary.totalCost)} · total processing ${formatDuration(this.summary.totalProcessing)} · avg ${formatDuration(average)}`,
 				),
 				width,
 			),
-			truncateToWidth(th.fg("dim", "费用按会话记录汇总；累计值均截至该轮"), width),
+			truncateToWidth(th.fg("dim", "Costs are summarized from the session record; cumulative values run up to each turn"), width),
 			th.fg("borderMuted", "─".repeat(Math.max(0, width))),
 		];
 
 		const visible = this.cachedBody.slice(this.scrollTop, this.scrollTop + bodyHeight);
-		const footerText = `↑↓/j k 选择 · PgUp/PgDn 翻页 · Enter 切回该轮（新分支）· Esc/q 关闭`;
+		const footerText = `↑↓/jk select · PgUp/PgDn page · Enter jump to turn (new branch) · Esc/q close`;
 		const footer = [
 			th.fg("borderMuted", "─".repeat(Math.max(0, width))),
 			truncateToWidth(th.fg("dim", footerText), width),
@@ -250,7 +250,7 @@ class TurnsComponent {
 	private buildBody(width: number): string[] {
 		const th = this.theme;
 		if (this.summary.rows.length === 0) {
-			return ["", truncateToWidth(th.fg("dim", "当前分支还没有用户 prompt。"), width)];
+			return ["", truncateToWidth(th.fg("dim", "No user prompts in this branch yet."), width)];
 		}
 
 		const lines: string[] = [];
@@ -259,16 +259,16 @@ class TurnsComponent {
 				truncateToWidth(
 					`${index === this.selectedIndex ? th.fg("accent", "❯") : " "} ` +
 						`${th.fg("accent", `#${row.index}`)} ${th.fg("dim", formatTime(row.promptAt))}  ` +
-						`${th.fg("muted", "模型")} ${row.models.join(", ") || "—"}${row.targetId ? "" : "（未完成，不可跳转）"}`,
+						`${th.fg("muted", "model")} ${row.models.join(", ") || "—"}${row.targetId ? "" : " (incomplete, not jumpable)"}`,
 					width,
 				),
 			);
 			lines.push(
 				truncateToWidth(
-					`  ${th.fg("muted", "本轮费用")} ${formatCost(row.cost)}  ` +
-						`${th.fg("muted", "累计费用")} ${formatCost(row.cumulativeCost)}  ` +
-						`${th.fg("muted", "本轮处理")} ${formatDuration(row.processingDuration)}  ` +
-						`${th.fg("muted", "累计处理")} ${formatDuration(row.cumulativeProcessing)}`,
+					`  ${th.fg("muted", "turn cost")} ${formatCost(row.cost)}  ` +
+						`${th.fg("muted", "cumulative cost")} ${formatCost(row.cumulativeCost)}  ` +
+						`${th.fg("muted", "turn time")} ${formatDuration(row.processingDuration)}  ` +
+						`${th.fg("muted", "cumulative time")} ${formatDuration(row.cumulativeProcessing)}`,
 					width,
 				),
 			);
@@ -283,13 +283,17 @@ export default function (pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "get_turn_stats",
 		label: "Get Turn Stats",
-		description: "获取当前会话分支中已结束用户轮次的模型、费用与处理时间。需要统计此前任务成本时使用。",
-		promptSnippet: "获取已结束轮次的模型、费用与处理时间",
-		promptGuidelines: ["使用 get_turn_stats 获取此前已完成任务的准确模型费用和处理时长；不要用它估算当前仍在执行的轮次。"],
+		description:
+			"Get the models, costs, and processing durations of completed user turns in the current session branch. Use it when you need statistics on the cost of earlier tasks.",
+		promptSnippet: "Get models, costs, and durations of completed turns",
+		promptGuidelines: [
+			"Use get_turn_stats for accurate model costs and durations of earlier completed tasks; do not use it to estimate the turn that is still running.",
+		],
 		parameters: Type.Object({}),
 		async execute(_toolCallId, _params, _signal, _onUpdate, ctx) {
 			const summary = collectTimings(ctx.sessionManager.getBranch());
-			// 工具调用发生时，最后一个用户轮次仍在执行，不能作为最终统计。
+			// When the tool call runs, the last user turn is still in progress and
+			// cannot be included in final statistics.
 			const completedRows = summary.rows.slice(0, -1);
 			const rows = completedRows.map((row) => ({
 				index: row.index,
@@ -320,10 +324,10 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("turns", {
-		description: "显示当前会话分支中所有 prompt 的模型、费用与时间统计",
+		description: "Show models, costs, and timing for every prompt in the current session branch",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
 			if (ctx.mode !== "tui") {
-				ctx.ui.notify("/turns 仅支持交互式 TUI", "error");
+				ctx.ui.notify("/turns is only available in interactive TUI mode", "error");
 				return;
 			}
 

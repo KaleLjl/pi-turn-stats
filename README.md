@@ -40,7 +40,6 @@ pi -e npm:pi-turn-stats
 - `/turns` requires interactive TUI mode; the `get_turn_stats` tool works in all modes.
 - Costs are summarized from the session record; cumulative values are up to that turn.
 - Turns that have not finished yet are listed but marked as not jumpable, and the tool excludes the still-running turn from its totals.
-- The UI text is currently in Chinese (中文).
 
 ## License
 
