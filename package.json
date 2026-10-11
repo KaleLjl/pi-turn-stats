@@ -1,0 +1,32 @@
+{
+	"name": "pi-turn-stats",
+	"version": "0.1.0",
+	"description": "Pi extension: /turns viewer and get_turn_stats tool for per-prompt model, cost, and processing-time statistics in the current session branch.",
+	"keywords": [
+		"pi-package",
+		"pi",
+		"pi-extension",
+		"turns",
+		"cost",
+		"statistics"
+	],
+	"license": "MIT",
+	"author": "KaleLjl",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/KaleLjl/pi-turn-stats.git"
+	},
+	"files": [
+		"extensions",
+		"README.md",
+		"LICENSE"
+	],
+	"pi": {
+		"extensions": ["./extensions/turns.ts"]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-ai": "*",
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*"
+	}
+}
