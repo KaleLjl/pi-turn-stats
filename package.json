@@ -1,6 +1,6 @@
 {
 	"name": "pi-turn-stats",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Pi extension: /turns viewer and get_turn_stats tool for per-prompt model, cost, and processing-time statistics in the current session branch.",
 	"keywords": [
 		"pi-package",
@@ -24,7 +24,9 @@
 	],
 	"pi": {
 		"image": "https://raw.githubusercontent.com/KaleLjl/pi-turn-stats/main/assets/screenshot.png",
-		"extensions": ["./extensions/turns.ts"]
+		"extensions": [
+			"./extensions/turns.ts"
+		]
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-ai": "*",

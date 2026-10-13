@@ -2,6 +2,8 @@
 
 A [Pi](https://pi.dev) extension that shows model, cost, and processing-time statistics for every user prompt in the current session branch.
 
+**GitHub:** <https://github.com/KaleLjl/pi-turn-stats> · **npm:** <https://www.npmjs.com/package/pi-turn-stats>
+
 ![screenshot](assets/screenshot.png)
 
 ## Features
