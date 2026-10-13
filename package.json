@@ -18,10 +18,12 @@
 	},
 	"files": [
 		"extensions",
+		"assets",
 		"README.md",
 		"LICENSE"
 	],
 	"pi": {
+		"image": "https://raw.githubusercontent.com/KaleLjl/pi-turn-stats/main/assets/screenshot.png",
 		"extensions": ["./extensions/turns.ts"]
 	},
 	"peerDependencies": {

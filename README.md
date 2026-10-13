@@ -2,6 +2,8 @@
 
 A [Pi](https://pi.dev) extension that shows model, cost, and processing-time statistics for every user prompt in the current session branch.
 
+![screenshot](assets/screenshot.png)
+
 ## Features
 
 - **`/turns` command** (interactive TUI): a full-screen viewer listing each user prompt in the current branch with:
